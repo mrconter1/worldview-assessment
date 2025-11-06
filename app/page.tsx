@@ -17,7 +17,7 @@ const QUESTIONS = [
   "People are not rational and often act against their own interests. Short-term impulses override long-term wellbeing constantly. Even when people know what would help them, they do the opposite because impulse and social pressure dominate decision-making.",
   "A good life is boring, and very few are willing to live such a life. Stability, routine, and moderation create wellbeing but lack excitement. People reject the mundane nature of sustainable happiness in favor of pursuing drama and intensity.",
   "People refuse to accept that things take time and therefore prioritize shortcuts like gambling, extreme training, and risk-taking. The slow path feels intolerable, which is mainly why people try to start exercise or learn a new language. People seek quick solutions even when they're less likely to work because gradual progress feels like no progress.",
-  "Politics is not something that is needed, but rather something that inevitably emerges in human systems. Whenever there are people and resources, power struggles develop regardless of intentions. Politics is an inherent feature of group dynamics that cannot be designed away.",
+  "Politics is not really 'needed' but rather something that inevitably emerges in human systems. Whenever there are people and resources, power struggles develop regardless of intentions. Politics is an inherent feature of group dynamics that cannot be designed away.",
   "People need suffering to have meaning, and if it doesn't, they create meaning from it. Meaningless pain is intolerable. Narratives of growth or purpose get constructed around hardship, such as reducing food intake by a lot, which is painful and therefore has to have effect, or starting intense exercise and suffering, and therefore it has to work because there is no alternative.",
   "Without growth in a company, climbing the ladder is a zero-sum game. Someone can only move up if someone else moves down or out. Advancement requires taking someone else's position, not creating new value or opportunities.",
   "After a relatively low skill level, average people don't get much more impressed as skill increases. The difference between novice and competent is visible, but the gap between competent and exceptional is invisible to most observers. Exceptional expertise goes unrecognized and unrewarded beyond a relatively low threshold.",
@@ -151,6 +151,7 @@ export default function Home() {
         localStorage.setItem("assessment_name", name);
         setSubmitted(true);
         setShowResults(true);
+        setShowStats(true);
       }
     } catch (error) {
       console.error("Submission error:", error);
