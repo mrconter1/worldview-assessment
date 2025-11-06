@@ -226,8 +226,8 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <p className="text-slate-400">
-            32 philosophical perspectives to explore your outlook
+          <p className="text-slate-300 text-sm leading-relaxed max-w-lg mx-auto">
+            This assessment explores how you view the world from a variety of angles. Complete all 32 questions to see how your worldview compares with other submissions.
           </p>
           {submitted && (
             <p className="mt-2 text-sm text-cyan-400">
