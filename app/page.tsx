@@ -201,8 +201,8 @@ export default function Home() {
             disabled={!allAnswered || submitting}
             className="group relative w-full px-8 py-3 font-semibold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-75 blur transition-all duration-300 group-hover:opacity-100 group-disabled:opacity-0" />
-            <div className="relative flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-8 py-3">
+            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-0 blur-sm transition-all duration-300 group-hover:opacity-30 group-disabled:opacity-0" />
+            <div className="relative flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 px-8 py-3 border border-cyan-500/30">
               {submitting ? "Submitting..." : "Submit & View Results"}
               <span className="text-lg">→</span>
             </div>
