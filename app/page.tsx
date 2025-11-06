@@ -55,21 +55,24 @@ export default function Home() {
   const [cookieId, setCookieId] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("assessment_cookie_id");
     const storedResponses = localStorage.getItem("assessment_responses");
     const storedName = localStorage.getItem("assessment_name");
+    const stored = localStorage.getItem("assessment_cookie_id");
 
-    if (stored) {
+    // Only show results if they have actually submitted (responses are stored)
+    if (storedResponses) {
       setCookieId(stored);
       setSubmitted(true);
-      if (storedResponses) {
-        setResponses(JSON.parse(storedResponses));
-      }
+      setResponses(JSON.parse(storedResponses));
       if (storedName) {
         setName(storedName);
       }
       setShowResults(true);
     } else {
+      // Delete cookie if no responses were submitted
+      if (stored) {
+        localStorage.removeItem("assessment_cookie_id");
+      }
       const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       setCookieId(newId);
       localStorage.setItem("assessment_cookie_id", newId);

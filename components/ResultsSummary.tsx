@@ -77,6 +77,35 @@ export function ResultsSummary({ responses, name, onNewSubmission, onViewStats }
           )}
         </motion.div>
 
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex flex-col gap-3 text-center mb-8"
+        >
+          <button
+            onClick={onNewSubmission}
+            className="group relative px-8 py-3 font-semibold text-white transition-all duration-300"
+          >
+            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-0 blur-sm transition-all duration-300 group-hover:opacity-30" />
+            <div className="relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 px-8 py-3 border border-cyan-500/30">
+              Submit New Answer
+              <span className="text-lg">↻</span>
+            </div>
+          </button>
+
+          <button
+            onClick={onViewStats}
+            className="group relative px-8 py-3 font-semibold text-white transition-all duration-300"
+          >
+            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-0 blur-sm transition-all duration-300 group-hover:opacity-30" />
+            <div className="relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 px-8 py-3 border border-purple-500/30">
+              View Statistics
+              <span className="text-lg">📊</span>
+            </div>
+          </button>
+        </motion.div>
+
         <div className="space-y-4 mb-8">
           {QUESTIONS.map((question, index) => (
             <motion.div
@@ -102,34 +131,6 @@ export function ResultsSummary({ responses, name, onNewSubmission, onViewStats }
           ))}
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="flex flex-col gap-3 text-center"
-        >
-          <button
-            onClick={onNewSubmission}
-            className="group relative px-8 py-3 font-semibold text-white transition-all duration-300"
-          >
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-0 blur-sm transition-all duration-300 group-hover:opacity-30" />
-            <div className="relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 px-8 py-3 border border-cyan-500/30">
-              Submit New Answer
-              <span className="text-lg">↻</span>
-            </div>
-          </button>
-
-          <button
-            onClick={onViewStats}
-            className="group relative px-8 py-3 font-semibold text-white transition-all duration-300"
-          >
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-0 blur-sm transition-all duration-300 group-hover:opacity-30" />
-            <div className="relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 px-8 py-3 border border-purple-500/30">
-              View Statistics
-              <span className="text-lg">📊</span>
-            </div>
-          </button>
-        </motion.div>
       </div>
     </div>
   );
