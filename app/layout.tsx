@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Worldview Assessment",
   description: "Explore your worldview and beliefs across 32 dimensions",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
