@@ -85,7 +85,7 @@ export function ResultsSummary({ responses, name, onNewSubmission, onViewStats }
         >
           <button
             onClick={onNewSubmission}
-            className="group relative px-8 py-3 font-semibold text-white transition-all duration-300"
+            className="group relative px-8 py-3 font-semibold text-white transition-all duration-300 cursor-pointer"
           >
             <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-0 blur-sm transition-all duration-300 group-hover:opacity-30" />
             <div className="relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 px-8 py-3 border border-cyan-500/30">
@@ -96,7 +96,7 @@ export function ResultsSummary({ responses, name, onNewSubmission, onViewStats }
 
           <button
             onClick={onViewStats}
-            className="group relative px-8 py-3 font-semibold text-white transition-all duration-300"
+            className="group relative px-8 py-3 font-semibold text-white transition-all duration-300 cursor-pointer"
           >
             <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-0 blur-sm transition-all duration-300 group-hover:opacity-30" />
             <div className="relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 px-8 py-3 border border-purple-500/30">

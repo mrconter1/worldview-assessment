@@ -157,7 +157,7 @@ export default function Home() {
             </h1>
             <button
               onClick={() => setShowStats(true)}
-              className="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1"
+              className="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1 cursor-pointer"
             >
               📊 Stats
             </button>
@@ -221,7 +221,7 @@ export default function Home() {
           <button
             onClick={handleSubmit}
             disabled={!allAnswered || submitting}
-            className="group relative w-full px-8 py-3 font-semibold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative w-full px-8 py-3 font-semibold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-0 blur-sm transition-all duration-300 group-hover:opacity-30 group-disabled:opacity-0" />
             <div className="relative flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 px-8 py-3 border border-cyan-500/30">

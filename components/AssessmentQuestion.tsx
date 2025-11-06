@@ -31,6 +31,14 @@ export function AssessmentQuestion({
   value,
   onChange,
 }: AssessmentQuestionProps) {
+  const handleClick = (response: ResponseType) => {
+    if (value === response) {
+      onChange(null);
+    } else {
+      onChange(response);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -50,10 +58,10 @@ export function AssessmentQuestion({
           {[1, 2, 3, 4, 5].map((response) => (
             <motion.button
               key={response}
-              onClick={() => onChange(response as ResponseType)}
+              onClick={() => handleClick(response as ResponseType)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`relative overflow-hidden rounded-lg py-2 px-2 text-xs font-semibold transition-all duration-200 ${
+              className={`relative overflow-hidden rounded-lg py-2 px-2 text-xs font-semibold transition-all duration-200 cursor-pointer ${
                 value === response
                   ? `bg-gradient-to-b ${SCALE_COLORS[response - 1]} text-white shadow-lg shadow-${SCALE_COLORS[response - 1].split(" ")[1].split("-")[1]}-500/50`
                   : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-slate-300"

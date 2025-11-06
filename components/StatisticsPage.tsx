@@ -99,7 +99,7 @@ export function StatisticsPage({ onClose }: { onClose: () => void }) {
           </h1>
           <button
             onClick={onClose}
-            className="mt-6 rounded-lg bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 px-8 py-3 text-white"
+            className="mt-6 rounded-lg bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 px-8 py-3 text-white cursor-pointer"
           >
             Back
           </button>
@@ -118,7 +118,7 @@ export function StatisticsPage({ onClose }: { onClose: () => void }) {
         >
           <button
             onClick={onClose}
-            className="mb-6 text-cyan-400 hover:text-cyan-300 transition-colors"
+            className="mb-6 text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
           >
             ← Back
           </button>
