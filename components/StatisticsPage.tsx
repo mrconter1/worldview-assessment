@@ -17,6 +17,8 @@ interface StatsData {
   questions: QuestionStats[];
 }
 
+type ResponseType = 1 | 2 | 3 | 4 | 5 | null;
+
 const QUESTIONS = [
   "Companies function more like royal courts than rational money-making machines. Power dynamics, favoritism, and personal relationships determine outcomes. Competence and merit are secondary considerations that provide convenient justification after political decisions are already made.",
   "Meritocracy is a myth. Those who succeed had advantages in background, connections, or circumstances that they don't acknowledge. The system rewards luck and privilege, while people who benefit construct narratives about having earned everything through their own efforts.",
@@ -60,7 +62,12 @@ const SCALE_COLORS = [
   "bg-green-600",
 ];
 
-export function StatisticsPage({ onClose }: { onClose: () => void }) {
+interface StatisticsPageProps {
+  onClose: () => void;
+  userResponses?: ResponseType[];
+}
+
+export function StatisticsPage({ onClose, userResponses }: StatisticsPageProps) {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -132,7 +139,16 @@ export function StatisticsPage({ onClose }: { onClose: () => void }) {
         </motion.div>
 
         <div className="space-y-6">
-          {stats.questions.map((question, index) => (
+          {stats.questions.map((question, index) => {
+            const userAnswer = userResponses?.[index];
+            const SCALE_LABELS = [
+              "Strongly Disagree",
+              "Disagree",
+              "Neutral",
+              "Agree",
+              "Strongly Agree",
+            ];
+            return (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 10 }}
@@ -144,9 +160,16 @@ export function StatisticsPage({ onClose }: { onClose: () => void }) {
                 <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 text-sm font-bold text-white">
                   {index + 1}
                 </div>
-                <p className="text-sm leading-relaxed text-slate-200">
-                  {QUESTIONS[index]}
-                </p>
+                <div className="flex-1">
+                  <p className="text-sm leading-relaxed text-slate-200 mb-2">
+                    {QUESTIONS[index]}
+                  </p>
+                  {userAnswer && (
+                    <p className="text-xs text-cyan-400">
+                      Your answer: <span className="font-semibold">{SCALE_LABELS[userAnswer - 1]}</span>
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-4 md:grid-cols-4">
@@ -206,7 +229,8 @@ export function StatisticsPage({ onClose }: { onClose: () => void }) {
                 </div>
               </div>
             </motion.div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

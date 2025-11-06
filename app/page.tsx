@@ -132,6 +132,7 @@ export default function Home() {
     return (
       <StatisticsPage
         onClose={() => setShowStats(false)}
+        userResponses={submitted ? responses : undefined}
       />
     );
   }
