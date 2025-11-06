@@ -156,12 +156,20 @@ export default function Home() {
             <h1 className="mb-3 text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               Worldview Assessment
             </h1>
-            <button
-              onClick={() => setShowStats(true)}
-              className="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1 cursor-pointer"
-            >
-              📊 Stats
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowStats(true)}
+                className="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                📊 Stats
+              </button>
+              <a
+                href="mailto:rasmus.lindahl1996@gmail.com"
+                className="text-sm text-slate-400 hover:text-slate-300 transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                ✉️ Contact
+              </a>
+            </div>
           </div>
           <p className="text-slate-400">
             32 philosophical perspectives to explore your outlook
