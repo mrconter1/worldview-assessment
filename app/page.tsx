@@ -53,11 +53,15 @@ export default function Home() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [cookieId, setCookieId] = useState<string | null>(null);
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [minTimeReached, setMinTimeReached] = useState(false);
+  const MIN_TIME_SECONDS = 90;
 
   useEffect(() => {
     const storedResponses = localStorage.getItem("assessment_responses");
     const storedName = localStorage.getItem("assessment_name");
     const stored = localStorage.getItem("assessment_cookie_id");
+    const storedStartTime = localStorage.getItem("assessment_start_time");
 
     // Only show results if they have actually submitted (responses are stored)
     if (storedResponses) {
@@ -72,11 +76,30 @@ export default function Home() {
       // Delete cookie if no responses were submitted
       if (stored) {
         localStorage.removeItem("assessment_cookie_id");
+        localStorage.removeItem("assessment_start_time");
       }
       const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const now = Date.now();
       setCookieId(newId);
       localStorage.setItem("assessment_cookie_id", newId);
+      localStorage.setItem("assessment_start_time", now.toString());
     }
+  }, []);
+
+  // Timer effect to track elapsed time
+  useEffect(() => {
+    const startTimeStr = localStorage.getItem("assessment_start_time");
+    if (!startTimeStr) return;
+
+    const startTime = parseInt(startTimeStr);
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - startTime) / 1000);
+      setTimeElapsed(elapsed);
+      setMinTimeReached(elapsed >= MIN_TIME_SECONDS);
+    }, 100);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleResponse = (index: number, value: ResponseType) => {
@@ -119,13 +142,18 @@ export default function Home() {
     localStorage.removeItem("assessment_cookie_id");
     localStorage.removeItem("assessment_responses");
     localStorage.removeItem("assessment_name");
+    localStorage.removeItem("assessment_start_time");
     const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const now = Date.now();
     setCookieId(newId);
     localStorage.setItem("assessment_cookie_id", newId);
+    localStorage.setItem("assessment_start_time", now.toString());
     setResponses(Array(QUESTIONS.length).fill(null));
     setName("");
     setSubmitted(false);
     setShowResults(false);
+    setTimeElapsed(0);
+    setMinTimeReached(false);
   };
 
   if (showStats) {
@@ -227,9 +255,15 @@ export default function Home() {
             />
           </div>
 
+          {!minTimeReached && !submitted && (
+            <div className="mb-4 p-3 rounded-lg bg-amber-900/30 border border-amber-700/50 text-amber-300 text-sm">
+              Please spend at least 90 seconds reviewing before submitting. Time remaining: {Math.max(0, MIN_TIME_SECONDS - timeElapsed)}s
+            </div>
+          )}
+
           <button
             onClick={handleSubmit}
-            disabled={!allAnswered || submitting}
+            disabled={!allAnswered || submitting || !minTimeReached}
             className="group relative w-full px-8 py-3 font-semibold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-0 blur-sm transition-all duration-300 group-hover:opacity-30 group-disabled:opacity-0" />
