@@ -26,7 +26,7 @@ export async function GET() {
       const questionStats = Array(32)
         .fill(null)
         .map(() => ({
-          responses: [],
+          responses: [] as number[],
           mean: 0,
           stdDev: 0,
           min: 0,
