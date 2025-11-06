@@ -6,6 +6,7 @@ interface ResultsSummaryProps {
   responses: ResponseType[];
   name: string;
   onNewSubmission: () => void;
+  onViewStats: () => void;
 }
 
 const SCALE_LABELS = [
@@ -59,7 +60,7 @@ const QUESTIONS = [
   "The important thing isn't how things actually are, but how things appear to be. Perception and presentation determine outcomes. Success depends on managing image, not on actual quality or performance underneath the surface.",
 ];
 
-export function ResultsSummary({ responses, name, onNewSubmission }: ResultsSummaryProps) {
+export function ResultsSummary({ responses, name, onNewSubmission, onViewStats }: ResultsSummaryProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8">
       <div className="mx-auto max-w-3xl">
@@ -105,7 +106,7 @@ export function ResultsSummary({ responses, name, onNewSubmission }: ResultsSumm
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="text-center"
+          className="flex flex-col gap-3 text-center"
         >
           <button
             onClick={onNewSubmission}
@@ -115,6 +116,17 @@ export function ResultsSummary({ responses, name, onNewSubmission }: ResultsSumm
             <div className="relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 px-8 py-3 border border-cyan-500/30">
               Submit New Answer
               <span className="text-lg">↻</span>
+            </div>
+          </button>
+
+          <button
+            onClick={onViewStats}
+            className="group relative px-8 py-3 font-semibold text-white transition-all duration-300"
+          >
+            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-0 blur-sm transition-all duration-300 group-hover:opacity-30" />
+            <div className="relative flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 px-8 py-3 border border-purple-500/30">
+              View Statistics
+              <span className="text-lg">📊</span>
             </div>
           </button>
         </motion.div>

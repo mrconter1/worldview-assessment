@@ -1,10 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AssessmentQuestion } from "@/components/AssessmentQuestion";
-import { ResultsSummary } from "@/components/ResultsSummary";
-import { StatisticsPage } from "@/components/StatisticsPage";
 import { motion } from "framer-motion";
+
+interface QuestionStats {
+  responses: number[];
+  mean: number;
+  stdDev: number;
+  min: number;
+  max: number;
+  distribution: { 1: number; 2: number; 3: number; 4: number; 5: number };
+}
+
+interface StatsData {
+  totalSubmissions: number;
+  questions: QuestionStats[];
+}
 
 const QUESTIONS = [
   "Companies function more like royal courts than rational money-making machines. Power dynamics, favoritism, and personal relationships determine outcomes. Competence and merit are secondary considerations that provide convenient justification after political decisions are already made.",
@@ -41,193 +52,164 @@ const QUESTIONS = [
   "The important thing isn't how things actually are, but how things appear to be. Perception and presentation determine outcomes. Success depends on managing image, not on actual quality or performance underneath the surface.",
 ];
 
-type ResponseType = 1 | 2 | 3 | 4 | 5 | null;
+const SCALE_COLORS = [
+  "bg-red-600",
+  "bg-orange-600",
+  "bg-amber-600",
+  "bg-lime-600",
+  "bg-green-600",
+];
 
-export default function Home() {
-  const [responses, setResponses] = useState<ResponseType[]>(
-    Array(QUESTIONS.length).fill(null)
-  );
-  const [showResults, setShowResults] = useState(false);
-  const [showStats, setShowStats] = useState(false);
-  const [name, setName] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [cookieId, setCookieId] = useState<string | null>(null);
+export function StatisticsPage({ onClose }: { onClose: () => void }) {
+  const [stats, setStats] = useState<StatsData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("assessment_cookie_id");
-    const storedResponses = localStorage.getItem("assessment_responses");
-    const storedName = localStorage.getItem("assessment_name");
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/stats");
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error("Failed to fetch stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (stored) {
-      setCookieId(stored);
-      setSubmitted(true);
-      if (storedResponses) {
-        setResponses(JSON.parse(storedResponses));
-      }
-      if (storedName) {
-        setName(storedName);
-      }
-      setShowResults(true);
-    } else {
-      const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      setCookieId(newId);
-      localStorage.setItem("assessment_cookie_id", newId);
-    }
+    fetchStats();
   }, []);
 
-  const handleResponse = (index: number, value: ResponseType) => {
-    const newResponses = [...responses];
-    newResponses[index] = value;
-    setResponses(newResponses);
-  };
-
-  const allAnswered = responses.every((r) => r !== null);
-
-  const handleSubmit = async () => {
-    if (!allAnswered || !cookieId) return;
-
-    setSubmitting(true);
-    try {
-      const response = await fetch("/api/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name || "Anonymous",
-          responses,
-          cookieId,
-        }),
-      });
-
-      if (response.ok) {
-        localStorage.setItem("assessment_responses", JSON.stringify(responses));
-        localStorage.setItem("assessment_name", name);
-        setSubmitted(true);
-        setShowResults(true);
-      }
-    } catch (error) {
-      console.error("Submission error:", error);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleNewSubmission = () => {
-    localStorage.removeItem("assessment_cookie_id");
-    localStorage.removeItem("assessment_responses");
-    localStorage.removeItem("assessment_name");
-    const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    setCookieId(newId);
-    localStorage.setItem("assessment_cookie_id", newId);
-    setResponses(Array(QUESTIONS.length).fill(null));
-    setName("");
-    setSubmitted(false);
-    setShowResults(false);
-  };
-
-  if (showStats) {
+  if (loading) {
     return (
-      <StatisticsPage
-        onClose={() => setShowStats(false)}
-      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8">
+        <div className="mx-auto max-w-4xl">
+          <div className="text-center text-slate-400">Loading statistics...</div>
+        </div>
+      </div>
     );
   }
 
-  if (showResults) {
+  if (!stats || stats.totalSubmissions === 0) {
     return (
-      <ResultsSummary
-        responses={responses}
-        name={name}
-        onNewSubmission={handleNewSubmission}
-        onViewStats={() => setShowStats(true)}
-      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <h1 className="mb-4 text-3xl font-bold text-slate-100">
+            No submissions yet
+          </h1>
+          <button
+            onClick={onClose}
+            className="mt-6 rounded-lg bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 px-8 py-3 text-white"
+          >
+            Back
+          </button>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8">
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-8 text-center">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="mb-3 text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Worldview Assessment
-            </h1>
-            <button
-              onClick={() => setShowStats(true)}
-              className="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1"
-            >
-              📊 Stats
-            </button>
-          </div>
-          <p className="text-slate-400">
-            32 philosophical perspectives to explore your outlook
-          </p>
-          {submitted && (
-            <p className="mt-2 text-sm text-cyan-400">
-              ✓ You've already submitted once
-            </p>
-          )}
-        </div>
+      <div className="mx-auto max-w-4xl">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <button
+            onClick={onClose}
+            className="mb-6 text-cyan-400 hover:text-cyan-300 transition-colors"
+          >
+            ← Back
+          </button>
 
-        <div className="mb-6 rounded-lg border border-slate-700/50 bg-slate-900/50 p-4 backdrop-blur">
-          <div className="text-sm text-slate-300">
-            Progress: {responses.filter((r) => r !== null).length} of{" "}
-            {QUESTIONS.length}
-          </div>
-          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-800">
-            <div
-              className="h-full bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 transition-all duration-300"
-              style={{
-                width: `${(responses.filter((r) => r !== null).length / QUESTIONS.length) * 100}%`,
-              }}
-            />
-          </div>
-        </div>
+          <h1 className="mb-2 text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Community Statistics
+          </h1>
+          <p className="text-slate-400">
+            {stats.totalSubmissions} submission{stats.totalSubmissions !== 1 ? "s" : ""} analyzed
+          </p>
+        </motion.div>
 
         <div className="space-y-6">
-          {QUESTIONS.map((question, index) => (
-            <AssessmentQuestion
+          {stats.questions.map((question, index) => (
+            <motion.div
               key={index}
-              number={index + 1}
-              question={question}
-              value={responses[index]}
-              onChange={(value) => handleResponse(index, value)}
-            />
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.01 }}
+              className="rounded-lg border border-slate-700/50 bg-slate-900/40 p-5 backdrop-blur"
+            >
+              <div className="mb-4 flex items-start gap-3">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 text-sm font-bold text-white">
+                  {index + 1}
+                </div>
+                <p className="text-sm leading-relaxed text-slate-200">
+                  {QUESTIONS[index]}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4 md:grid-cols-4">
+                <div className="rounded-lg bg-slate-800/50 p-3">
+                  <p className="text-xs text-slate-400">Average</p>
+                  <p className="text-2xl font-bold text-cyan-400">
+                    {question.mean.toFixed(2)}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-slate-800/50 p-3">
+                  <p className="text-xs text-slate-400">Std Dev</p>
+                  <p className="text-2xl font-bold text-purple-400">
+                    {question.stdDev.toFixed(2)}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-slate-800/50 p-3">
+                  <p className="text-xs text-slate-400">Min</p>
+                  <p className="text-2xl font-bold text-orange-400">
+                    {question.min}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-slate-800/50 p-3">
+                  <p className="text-xs text-slate-400">Max</p>
+                  <p className="text-2xl font-bold text-green-400">
+                    {question.max}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-slate-400 mb-2">Distribution</p>
+                <div className="flex items-end gap-2 h-20">
+                  {[1, 2, 3, 4, 5].map((value) => {
+                    const count = question.distribution[value];
+                    const maxCount = Math.max(
+                      ...Object.values(question.distribution)
+                    );
+                    const height = maxCount > 0 ? (count / maxCount) * 100 : 0;
+
+                    return (
+                      <div
+                        key={value}
+                        className="flex-1 flex flex-col items-center gap-1"
+                      >
+                        <div
+                          className={`w-full rounded-t transition-all ${SCALE_COLORS[value - 1]}`}
+                          style={{ height: `${height || 5}px` }}
+                        />
+                        <div className="text-xs text-slate-400">{count}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex gap-2 mt-2 text-xs text-slate-500">
+                  <span>← Strongly Disagree</span>
+                  <span>Strongly Agree →</span>
+                </div>
+              </div>
+            </motion.div>
           ))}
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mt-8 rounded-lg border border-slate-700/50 bg-slate-900/80 p-6 backdrop-blur"
-        >
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Your Name (optional)
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Leave blank to stay anonymous"
-              className="w-full rounded-lg bg-slate-800/50 border border-slate-700/50 px-4 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all"
-            />
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={!allAnswered || submitting}
-            className="group relative w-full px-8 py-3 font-semibold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-0 blur-sm transition-all duration-300 group-hover:opacity-30 group-disabled:opacity-0" />
-            <div className="relative flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-cyan-600 via-purple-600 to-pink-600 px-8 py-3 border border-cyan-500/30">
-              {submitting ? "Submitting..." : "Submit & View Results"}
-              <span className="text-lg">→</span>
-            </div>
-          </button>
-        </motion.div>
       </div>
     </div>
   );
 }
+
