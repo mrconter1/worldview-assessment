@@ -126,7 +126,7 @@ export function ResultsSummary({ responses, name, onNewSubmission, onViewStats }
                 {[1, 2, 3, 4, 5].map((response) => (
                   <div
                     key={response}
-                    className={`relative overflow-hidden rounded-lg py-2 px-1 text-xs font-semibold transition-all ${
+                    className={`relative overflow-hidden rounded-lg py-2 px-1 text-xs font-semibold transition-all text-center ${
                       responses[index] === response
                         ? `bg-gradient-to-b ${SCALE_COLORS[response - 1]} text-white shadow-lg`
                         : "bg-slate-800/50 text-slate-400"
