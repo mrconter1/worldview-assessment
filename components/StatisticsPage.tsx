@@ -281,7 +281,7 @@ export function StatisticsPage({ onClose, userResponses: initialUserResponses }:
                 <div className="rounded-lg border border-slate-700/30 bg-slate-800/30 p-4">
                   <div className="flex items-end justify-between gap-3 h-48 mb-4">
                     {[1, 2, 3, 4, 5].map((value) => {
-                      const count = question.distribution[value];
+                      const count = question.distribution[value as 1 | 2 | 3 | 4 | 5];
                       const maxCount = Math.max(
                         ...Object.values(question.distribution)
                       );
