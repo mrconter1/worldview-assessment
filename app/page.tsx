@@ -55,13 +55,25 @@ export default function Home() {
   const [cookieId, setCookieId] = useState<string | null>(null);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [minTimeReached, setMinTimeReached] = useState(false);
+  const [questionOrder, setQuestionOrder] = useState<number[]>([]);
   const MIN_TIME_SECONDS = 90;
+
+  // Helper function to shuffle array
+  const shuffleArray = (array: number[]) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
 
   useEffect(() => {
     const storedResponses = localStorage.getItem("assessment_responses");
     const storedName = localStorage.getItem("assessment_name");
     const stored = localStorage.getItem("assessment_cookie_id");
     const storedStartTime = localStorage.getItem("assessment_start_time");
+    const storedQuestionOrder = localStorage.getItem("assessment_question_order");
 
     // Only show results if they have actually submitted (responses are stored)
     if (storedResponses) {
@@ -71,18 +83,27 @@ export default function Home() {
       if (storedName) {
         setName(storedName);
       }
+      if (storedQuestionOrder) {
+        setQuestionOrder(JSON.parse(storedQuestionOrder));
+      }
       setShowResults(true);
     } else {
       // Delete cookie if no responses were submitted
       if (stored) {
         localStorage.removeItem("assessment_cookie_id");
         localStorage.removeItem("assessment_start_time");
+        localStorage.removeItem("assessment_question_order");
       }
       const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       const now = Date.now();
+      const initialOrder = Array.from({ length: QUESTIONS.length }, (_, i) => i);
+      const randomizedOrder = shuffleArray(initialOrder);
+      
       setCookieId(newId);
       localStorage.setItem("assessment_cookie_id", newId);
       localStorage.setItem("assessment_start_time", now.toString());
+      localStorage.setItem("assessment_question_order", JSON.stringify(randomizedOrder));
+      setQuestionOrder(randomizedOrder);
     }
   }, []);
 
@@ -143,11 +164,17 @@ export default function Home() {
     localStorage.removeItem("assessment_responses");
     localStorage.removeItem("assessment_name");
     localStorage.removeItem("assessment_start_time");
+    localStorage.removeItem("assessment_question_order");
     const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const now = Date.now();
+    const initialOrder = Array.from({ length: QUESTIONS.length }, (_, i) => i);
+    const randomizedOrder = shuffleArray(initialOrder);
+    
     setCookieId(newId);
     localStorage.setItem("assessment_cookie_id", newId);
     localStorage.setItem("assessment_start_time", now.toString());
+    localStorage.setItem("assessment_question_order", JSON.stringify(randomizedOrder));
+    setQuestionOrder(randomizedOrder);
     setResponses(Array(QUESTIONS.length).fill(null));
     setName("");
     setSubmitted(false);
@@ -225,13 +252,13 @@ export default function Home() {
         </div>
 
         <div className="space-y-6">
-          {QUESTIONS.map((question, index) => (
+          {questionOrder.map((originalIndex, displayIndex) => (
             <AssessmentQuestion
-              key={index}
-              number={index + 1}
-              question={question}
-              value={responses[index]}
-              onChange={(value) => handleResponse(index, value)}
+              key={originalIndex}
+              number={displayIndex + 1}
+              question={QUESTIONS[originalIndex]}
+              value={responses[originalIndex]}
+              onChange={(value) => handleResponse(originalIndex, value)}
             />
           ))}
         </div>
