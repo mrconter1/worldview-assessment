@@ -68,11 +68,26 @@ interface StatisticsPageProps {
   userResponses?: ResponseType[];
 }
 
-export function StatisticsPage({ onClose, userResponses }: StatisticsPageProps) {
+export function StatisticsPage({ onClose, userResponses: initialUserResponses }: StatisticsPageProps) {
   const searchParams = useSearchParams();
   const debug = searchParams?.get("debug") === "true";
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userResponses, setUserResponses] = useState<ResponseType[]>(initialUserResponses || []);
+
+  useEffect(() => {
+    // Read user responses from localStorage if not provided via props
+    if (!initialUserResponses || initialUserResponses.length === 0) {
+      const storedResponses = localStorage.getItem("assessment_responses");
+      if (storedResponses) {
+        try {
+          setUserResponses(JSON.parse(storedResponses));
+        } catch (error) {
+          console.error("Failed to parse stored responses:", error);
+        }
+      }
+    }
+  }, [initialUserResponses]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -100,12 +115,11 @@ export function StatisticsPage({ onClose, userResponses }: StatisticsPageProps) 
           };
           setStats(mockStats);
           // Mock user responses
-          if (userResponses?.length === 0) {
-            userResponses = Array.from(
-              { length: 32 },
-              () => (Math.floor(Math.random() * 5) + 1) as ResponseType
-            );
-          }
+          const mockUserResponses = Array.from(
+            { length: 32 },
+            () => (Math.floor(Math.random() * 5) + 1) as ResponseType
+          );
+          setUserResponses(mockUserResponses);
         } else {
           const response = await fetch("/api/stats");
           const data = await response.json();
@@ -207,13 +221,29 @@ export function StatisticsPage({ onClose, userResponses }: StatisticsPageProps) 
                   <p className="text-sm leading-relaxed text-slate-200 mb-2">
                     {QUESTIONS[index]}
                   </p>
-                  {userAnswer && (
-                    <p className="text-xs text-cyan-400">
-                      Your answer: <span className="font-semibold">{SCALE_LABELS[userAnswer - 1]}</span>
-                    </p>
-                  )}
                 </div>
               </div>
+
+              {userAnswer && (
+                <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-cyan-900/40 to-purple-900/40 border border-cyan-700/50">
+                  <p className="text-xs text-slate-300 mb-1">Your Answer</p>
+                  <p className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                    {SCALE_LABELS[userAnswer - 1]}
+                  </p>
+                  <div className="mt-2 flex gap-1">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <div
+                        key={value}
+                        className={`flex-1 h-1 rounded-full transition-all ${
+                          value === userAnswer
+                            ? SCALE_COLORS[value - 1]
+                            : "bg-slate-700/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4 mb-4 md:grid-cols-4">
                 <div className="rounded-lg bg-slate-800/50 p-3">
@@ -242,33 +272,52 @@ export function StatisticsPage({ onClose, userResponses }: StatisticsPageProps) 
                 </div>
               </div>
 
-              <div>
-                <p className="text-xs text-slate-400 mb-2">Distribution</p>
-                <div className="flex items-end gap-2 h-20">
-                  {[1, 2, 3, 4, 5].map((value) => {
-                    const count = question.distribution[value];
-                    const maxCount = Math.max(
-                      ...Object.values(question.distribution)
-                    );
-                    const height = maxCount > 0 ? (count / maxCount) * 100 : 0;
-
-                    return (
-                      <div
-                        key={value}
-                        className="flex-1 flex flex-col items-center gap-1"
-                      >
-                        <div
-                          className={`w-full rounded-t transition-all ${SCALE_COLORS[value - 1]}`}
-                          style={{ height: `${height || 5}px` }}
-                        />
-                        <div className="text-xs text-slate-400">{count}</div>
-                      </div>
-                    );
-                  })}
+              <div className="mt-8 pt-6 border-t border-slate-700/30">
+                <div className="mb-8">
+                  <p className="text-sm font-semibold text-slate-300 mb-1">Community Distribution</p>
+                  <p className="text-xs text-slate-500">How others responded to this question</p>
                 </div>
-                <div className="flex gap-2 mt-2 text-xs text-slate-500">
-                  <span>← Strongly Disagree</span>
-                  <span>Strongly Agree →</span>
+                
+                <div className="rounded-lg border border-slate-700/30 bg-slate-800/30 p-6 overflow-hidden">
+                  <div className="flex items-end justify-between gap-3 h-24 mb-4">
+                    {[1, 2, 3, 4, 5].map((value) => {
+                      const count = question.distribution[value];
+                      const maxCount = Math.max(
+                        ...Object.values(question.distribution)
+                      );
+                      const height = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                      const isUserAnswer = userAnswer === value;
+                      const percentage = question.distribution[1] + question.distribution[2] + question.distribution[3] + question.distribution[4] + question.distribution[5] > 0
+                        ? ((count / (question.distribution[1] + question.distribution[2] + question.distribution[3] + question.distribution[4] + question.distribution[5])) * 100).toFixed(0)
+                        : 0;
+
+                      return (
+                        <div
+                          key={value}
+                          className={`flex-1 flex flex-col items-center gap-2 transition-all ${
+                            isUserAnswer ? "scale-105" : ""
+                          }`}
+                        >
+                          <div className={`w-full transition-all duration-300 rounded-t-lg ${
+                            isUserAnswer
+                              ? `${SCALE_COLORS[value - 1]} shadow-lg shadow-current/30 ring-2 ring-white`
+                              : `${SCALE_COLORS[value - 1]} opacity-60 hover:opacity-80`
+                          }`}
+                          style={{ height: `${Math.max(height, 8)}px` }}
+                          />
+                          <div className="flex flex-col items-center gap-0.5">
+                            <div className={`text-xs font-semibold ${isUserAnswer ? "text-white" : "text-slate-300"}`}>{count}</div>
+                            <div className="text-xs text-slate-500">{percentage}%</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  
+                  <div className="flex justify-between text-xs text-slate-400 px-1">
+                    <span className="font-medium">← Strongly Disagree</span>
+                    <span className="font-medium">Strongly Agree →</span>
+                  </div>
                 </div>
               </div>
             </motion.div>
