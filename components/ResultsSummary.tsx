@@ -18,11 +18,11 @@ const SCALE_LABELS = [
 ];
 
 const SCALE_COLORS = [
-  "text-red-500",
-  "text-orange-500",
-  "text-amber-500",
-  "text-lime-500",
-  "text-green-500",
+  "from-red-600 to-red-500",
+  "from-orange-600 to-orange-500",
+  "from-amber-600 to-amber-500",
+  "from-lime-600 to-lime-500",
+  "from-green-600 to-green-500",
 ];
 
 const QUESTIONS = [
@@ -115,17 +115,28 @@ export function ResultsSummary({ responses, name, onNewSubmission, onViewStats }
               transition={{ delay: index * 0.01 }}
               className="rounded-lg border border-slate-700/50 bg-slate-900/40 p-4 backdrop-blur hover:border-slate-600/50 transition-all"
             >
-              <div className="flex items-start gap-3 mb-3">
+              <div className="flex items-start gap-3 mb-4">
                 <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 text-sm font-bold text-white">
                   {index + 1}
                 </div>
                 <p className="text-sm leading-relaxed text-slate-200">{question}</p>
               </div>
 
-              <div className="ml-11">
-                <p className={`text-sm font-semibold ${SCALE_COLORS[responses[index] ? responses[index] - 1 : 0]}`}>
-                  {responses[index] ? SCALE_LABELS[responses[index] - 1] : "No answer"}
-                </p>
+              <div className="ml-11 grid grid-cols-5 gap-2">
+                {[1, 2, 3, 4, 5].map((response) => (
+                  <div
+                    key={response}
+                    className={`relative overflow-hidden rounded-lg py-2 px-1 text-xs font-semibold transition-all ${
+                      responses[index] === response
+                        ? `bg-gradient-to-b ${SCALE_COLORS[response - 1]} text-white shadow-lg`
+                        : "bg-slate-800/50 text-slate-400"
+                    }`}
+                  >
+                    <span className="relative z-10 block leading-tight">
+                      {SCALE_LABELS[response - 1]}
+                    </span>
+                  </div>
+                ))}
               </div>
             </motion.div>
           ))}
