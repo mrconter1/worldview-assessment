@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AssessmentQuestion } from "@/components/AssessmentQuestion";
 import { ResultsSummary } from "@/components/ResultsSummary";
+import { motion } from "framer-motion";
 
 const QUESTIONS = [
   "Companies function more like royal courts than rational money-making machines. Power dynamics, favoritism, and personal relationships determine outcomes. Competence and merit are secondary considerations that provide convenient justification after political decisions are already made.",
@@ -46,6 +47,32 @@ export default function Home() {
     Array(QUESTIONS.length).fill(null)
   );
   const [showResults, setShowResults] = useState(false);
+  const [name, setName] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [cookieId, setCookieId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("assessment_cookie_id");
+    const storedResponses = localStorage.getItem("assessment_responses");
+    const storedName = localStorage.getItem("assessment_name");
+
+    if (stored) {
+      setCookieId(stored);
+      setSubmitted(true);
+      if (storedResponses) {
+        setResponses(JSON.parse(storedResponses));
+      }
+      if (storedName) {
+        setName(storedName);
+      }
+      setShowResults(true);
+    } else {
+      const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      setCookieId(newId);
+      localStorage.setItem("assessment_cookie_id", newId);
+    }
+  }, []);
 
   const handleResponse = (index: number, value: ResponseType) => {
     const newResponses = [...responses];
@@ -55,14 +82,53 @@ export default function Home() {
 
   const allAnswered = responses.every((r) => r !== null);
 
+  const handleSubmit = async () => {
+    if (!allAnswered || !cookieId) return;
+
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name || "Anonymous",
+          responses,
+          cookieId,
+        }),
+      });
+
+      if (response.ok) {
+        localStorage.setItem("assessment_responses", JSON.stringify(responses));
+        localStorage.setItem("assessment_name", name);
+        setSubmitted(true);
+        setShowResults(true);
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleNewSubmission = () => {
+    localStorage.removeItem("assessment_cookie_id");
+    localStorage.removeItem("assessment_responses");
+    localStorage.removeItem("assessment_name");
+    const newId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    setCookieId(newId);
+    localStorage.setItem("assessment_cookie_id", newId);
+    setResponses(Array(QUESTIONS.length).fill(null));
+    setName("");
+    setSubmitted(false);
+    setShowResults(false);
+  };
+
   if (showResults) {
     return (
       <ResultsSummary
         responses={responses}
-        onReset={() => {
-          setResponses(Array(QUESTIONS.length).fill(null));
-          setShowResults(false);
-        }}
+        name={name}
+        onNewSubmission={handleNewSubmission}
       />
     );
   }
@@ -77,6 +143,11 @@ export default function Home() {
           <p className="text-slate-400">
             32 philosophical perspectives to explore your outlook
           </p>
+          {submitted && (
+            <p className="mt-2 text-sm text-cyan-400">
+              ✓ You've already submitted once
+            </p>
+          )}
         </div>
 
         <div className="mb-6 rounded-lg border border-slate-700/50 bg-slate-900/50 p-4 backdrop-blur">
@@ -106,19 +177,37 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="sticky bottom-4 mt-8 flex justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mt-8 rounded-lg border border-slate-700/50 bg-slate-900/80 p-6 backdrop-blur"
+        >
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Your Name (optional)
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Leave blank to stay anonymous"
+              className="w-full rounded-lg bg-slate-800/50 border border-slate-700/50 px-4 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all"
+            />
+          </div>
+
           <button
-            onClick={() => setShowResults(true)}
-            disabled={!allAnswered}
-            className="group relative px-8 py-3 font-semibold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleSubmit}
+            disabled={!allAnswered || submitting}
+            className="group relative w-full px-8 py-3 font-semibold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-75 blur transition-all duration-300 group-hover:opacity-100 group-disabled:opacity-0" />
-            <div className="relative flex items-center gap-2 rounded-lg bg-slate-950 px-8 py-3">
-              View Results
+            <div className="relative flex items-center justify-center gap-2 rounded-lg bg-slate-950 px-8 py-3">
+              {submitting ? "Submitting..." : "Submit & View Results"}
               <span className="text-lg">→</span>
             </div>
           </button>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

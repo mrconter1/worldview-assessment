@@ -4,7 +4,8 @@ type ResponseType = 1 | 2 | 3 | 4 | 5 | null;
 
 interface ResultsSummaryProps {
   responses: ResponseType[];
-  onReset: () => void;
+  name: string;
+  onNewSubmission: () => void;
 }
 
 const CATEGORIES = [
@@ -19,7 +20,7 @@ const CATEGORIES = [
   { name: "Perception & Reality", questions: [32] },
 ];
 
-export function ResultsSummary({ responses, onReset }: ResultsSummaryProps) {
+export function ResultsSummary({ responses, name, onNewSubmission }: ResultsSummaryProps) {
   const categoryScores = CATEGORIES.map((category) => {
     const scores = category.questions
       .map((q) => responses[q])
@@ -62,6 +63,9 @@ export function ResultsSummary({ responses, onReset }: ResultsSummaryProps) {
             Your Worldview Profile
           </h1>
           <p className="text-slate-400">Based on your responses across 32 perspectives</p>
+          {name && name !== "Anonymous" && (
+            <p className="mt-2 text-sm text-cyan-400">Welcome, {name}!</p>
+          )}
         </motion.div>
 
         <motion.div
@@ -132,12 +136,12 @@ export function ResultsSummary({ responses, onReset }: ResultsSummaryProps) {
           className="text-center"
         >
           <button
-            onClick={onReset}
+            onClick={onNewSubmission}
             className="group relative px-8 py-3 font-semibold text-white transition-all duration-300"
           >
             <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-75 blur transition-all duration-300 group-hover:opacity-100" />
             <div className="relative flex items-center gap-2 rounded-lg bg-slate-950 px-8 py-3">
-              Start Over
+              Submit New Answer
               <span className="text-lg">↻</span>
             </div>
           </button>
@@ -146,4 +150,3 @@ export function ResultsSummary({ responses, onReset }: ResultsSummaryProps) {
     </div>
   );
 }
-
