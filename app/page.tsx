@@ -190,7 +190,7 @@ export default function Home() {
         responses={responses}
         name={name}
         onNewSubmission={handleNewSubmission}
-        onViewStats={() => setShowStats(true)}
+        onViewStats={() => router.push("/statistics")}
       />
     );
   }
