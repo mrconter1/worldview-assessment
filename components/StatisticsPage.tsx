@@ -278,8 +278,8 @@ export function StatisticsPage({ onClose, userResponses: initialUserResponses }:
                   <p className="text-xs text-slate-500">How others responded to this question</p>
                 </div>
                 
-                <div className="rounded-lg border border-slate-700/30 bg-slate-800/30 p-6 overflow-hidden">
-                  <div className="flex items-end justify-between gap-3 h-24 mb-4">
+                <div className="rounded-lg border border-slate-700/30 bg-slate-800/30 p-4">
+                  <div className="flex items-end justify-between gap-3 h-48 mb-4">
                     {[1, 2, 3, 4, 5].map((value) => {
                       const count = question.distribution[value];
                       const maxCount = Math.max(
