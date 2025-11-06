@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 
 interface QuestionStats {
@@ -68,15 +69,48 @@ interface StatisticsPageProps {
 }
 
 export function StatisticsPage({ onClose, userResponses }: StatisticsPageProps) {
+  const searchParams = useSearchParams();
+  const debug = searchParams?.get("debug") === "true";
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("/api/stats");
-        const data = await response.json();
-        setStats(data);
+        if (debug) {
+          // Mock data for debugging
+          const mockStats: StatsData = {
+            totalSubmissions: 150,
+            questions: Array.from({ length: 32 }, (_, i) => ({
+              responses: Array.from({ length: 150 }, () =>
+                Math.floor(Math.random() * 5) + 1
+              ),
+              mean: 3.2 + Math.random() * 1.5,
+              stdDev: 1.1 + Math.random() * 0.5,
+              min: 1,
+              max: 5,
+              distribution: {
+                1: Math.floor(Math.random() * 30),
+                2: Math.floor(Math.random() * 30),
+                3: Math.floor(Math.random() * 40),
+                4: Math.floor(Math.random() * 30),
+                5: Math.floor(Math.random() * 30),
+              },
+            })),
+          };
+          setStats(mockStats);
+          // Mock user responses
+          if (userResponses?.length === 0) {
+            userResponses = Array.from(
+              { length: 32 },
+              () => (Math.floor(Math.random() * 5) + 1) as ResponseType
+            );
+          }
+        } else {
+          const response = await fetch("/api/stats");
+          const data = await response.json();
+          setStats(data);
+        }
       } catch (error) {
         console.error("Failed to fetch stats:", error);
       } finally {
@@ -85,7 +119,7 @@ export function StatisticsPage({ onClose, userResponses }: StatisticsPageProps) 
     };
 
     fetchStats();
-  }, []);
+  }, [debug]);
 
   if (loading) {
     return (
@@ -130,12 +164,21 @@ export function StatisticsPage({ onClose, userResponses }: StatisticsPageProps) 
             ← Back
           </button>
 
-          <h1 className="mb-2 text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Community Statistics
-          </h1>
-          <p className="text-slate-400">
-            {stats.totalSubmissions} submission{stats.totalSubmissions !== 1 ? "s" : ""} analyzed
-          </p>
+          <div className="flex items-center gap-3">
+            <div>
+              <h1 className="mb-2 text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Community Statistics
+              </h1>
+              <p className="text-slate-400">
+                {stats.totalSubmissions} submission{stats.totalSubmissions !== 1 ? "s" : ""} analyzed
+              </p>
+            </div>
+            {debug && (
+              <div className="ml-auto px-3 py-1 rounded-full bg-yellow-900/50 border border-yellow-700/50 text-yellow-300 text-xs font-semibold">
+                DEBUG MODE
+              </div>
+            )}
+          </div>
         </motion.div>
 
         <div className="space-y-6">

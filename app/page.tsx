@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { AssessmentQuestion } from "@/components/AssessmentQuestion";
 import { ResultsSummary } from "@/components/ResultsSummary";
-import { StatisticsPage } from "@/components/StatisticsPage";
 import { motion } from "framer-motion";
 
 const QUESTIONS = [
@@ -44,11 +44,11 @@ const QUESTIONS = [
 type ResponseType = 1 | 2 | 3 | 4 | 5 | null;
 
 export default function Home() {
+  const router = useRouter();
   const [responses, setResponses] = useState<ResponseType[]>(
     Array(QUESTIONS.length).fill(null)
   );
   const [showResults, setShowResults] = useState(false);
-  const [showStats, setShowStats] = useState(false);
   const [name, setName] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -151,7 +151,7 @@ export default function Home() {
         localStorage.setItem("assessment_name", name);
         setSubmitted(true);
         setShowResults(true);
-        setShowStats(true);
+        router.push("/statistics");
       }
     } catch (error) {
       console.error("Submission error:", error);
@@ -184,15 +184,6 @@ export default function Home() {
     setMinTimeReached(false);
   };
 
-  if (showStats) {
-    return (
-      <StatisticsPage
-        onClose={() => setShowStats(false)}
-        userResponses={submitted ? responses : undefined}
-      />
-    );
-  }
-
   if (showResults) {
     return (
       <ResultsSummary
@@ -214,7 +205,7 @@ export default function Home() {
             </h1>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setShowStats(true)}
+                onClick={() => router.push("/statistics")}
                 className="text-sm text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1 cursor-pointer"
               >
                 📊 Stats
