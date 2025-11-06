@@ -35,11 +35,11 @@ export async function GET() {
         }));
 
       // Collect all responses per question
-      responses.forEach((responseArray) => {
-        responseArray.forEach((value, index) => {
+      responses.forEach((responseArray: number[]) => {
+        responseArray.forEach((value: number, index: number) => {
           if (value !== null && questionStats[index]) {
             questionStats[index].responses.push(value);
-            questionStats[index].distribution[value]++;
+            questionStats[index].distribution[value as 1 | 2 | 3 | 4 | 5]++;
           }
         });
       });
